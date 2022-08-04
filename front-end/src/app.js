@@ -1,22 +1,44 @@
-import React from "react";
-
+import React, { useState } from "react";
+import Movies from "./pages.js/movies";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
 export default function App() {
-  const options = {
-    method: "GET",
-    headers: {
-      "X-RapidAPI-Key": "00f55e7dafmshf5886564aedb5a3p190497jsn2adc001668d9",
-      "X-RapidAPI-Host":
-        "utelly-tv-shows-and-movies-availability-v1.p.rapidapi.com",
-    },
+  const api_Key = process.env.REACT_APP_KEY;
+
+  // set state for movie query
+  const [movie, setMovie] = useState("");
+  const [searchResult, setSearchResult] = useState([]);
+
+  // functions for handling input / submit to get users movie query search
+  const handleChange = (event) => {
+    setMovie(event.target.value);
   };
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    fetch(
+      `https:api.themoviedb.org/3/search/movie?api_key=${api_Key}&language=en-US&query=${movie}&page=1&include_adult=false`
+    )
+      .then((response) => response.json())
+      .then((response) => setSearchResult([...response.results]))
+      .catch((err) => console.error(err));
+  };
+  console.log(searchResult);
 
-  fetch(
-    "https://utelly-tv-shows-and-movies-availability-v1.p.rapidapi.com/idlookup?source_id=tt3398228&source=imdb&country=us",
-    options
-  )
-    .then((response) => response.json())
-    .then((response) => console.log(response))
-    .catch((err) => console.error(err));
-
-  return <div>App</div>;
+  return (
+    <BrowserRouter>
+      {" "}
+      <Routes>
+        {" "}
+        <Route
+          path="/"
+          element={
+            <Movies
+              handleChange={handleChange}
+              handleSubmit={handleSubmit}
+              searchResult={searchResult}
+            />
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
 }
